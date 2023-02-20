@@ -1,15 +1,18 @@
 // List of External Dependencies
-const {campgroundSchema, reviewSchema } = require('./schemas.js');
-const catchAsync = require('./utils/catchAsync');
 const engine = require('ejs-mate');
 const express = require('express');
 const path = require('path');
 const methodOverride = require('method-override');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
-const Campground = require('./models/campground');
-const Review = require('./models/review.js')
 const ExpressError = require('./utils/ExpressError');
+const campgrounds = require('./routes/campgrounds.js');
+const reviews = require('./routes/reviews');
+const session = require('express-session');
+const flash = require('connect-flash')
+
+// To avoid deprecation warnings.
+mongoose.set('strictQuery', true);
 
 // Open the database connection.
 mongoose.connect('mongodb://localhost:27017/yelp-camp', {
@@ -42,100 +45,42 @@ app.use(express.urlencoded({extended: true}));
 // To force change any post methods to DELETE or PATCH where necessary.
 app.use(methodOverride('_method'));
 
+//Tells the app where the public files are.
+app.use(express.static(path.join(__dirname, 'public')));
+
+// COnfigure the session cookie.
+const sessionConfig ={
+    secret: 'badsecret',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        httpOnly: true, // To disable client side scripts accessing session cookie.
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+        maxAge: 1000 * 60 * 60 * 24 * 7
+    }
+}
+app.use(session(sessionConfig))
+
+// Enable flashing messages.
+app.use(flash());
+
 // Providing more detail on HTTP requests in the console.
 app.use(morgan('common'));
 
-// Middleware to check if campground exists.
-const validateCampground = (req, res, next) => {
-    const {error} = campgroundSchema.validate(req.body);
-    if(error){
-        const msg = error.details.map(el => el.message).join(',');
-        throw new ExpressError(400, msg)
-    } else {
-        next();
-    }
-}
+// Middleware for accessing flashed messages before any request.
+app.use((req, res, next) => {
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
+    next();
+})
 
-// Middleware to check if review exists.
-const validateReview = (req, res, next) => {
-    const {error} = reviewSchema.validate(req.body);
-    if(error){
-        const msg = error.details.map(el => el.message).join(',');
-        throw new ExpressError(400, msg)
-    } else {
-        next();
-    }
-}
+app.use('/campgrounds', campgrounds);
+app.use('/campgrounds/:id/reviews', reviews);
 
 // Home Page
 app.get('/', (req, res) => {
     res.render('index');
 });
-
-// Index of all campgrounds.
-app.get('/campgrounds', catchAsync(async (req, res) => {
-    const campgrounds = await Campground.find({});
-    res.render('campgrounds/index', {campgrounds});
-}));
-
-// Add a new campground.
-app.get('/campgrounds/new', (req, res) => {
-    res.render('campgrounds/new');
-});
-
-// Submit a new campground.
-app.post('/campgrounds', validateCampground, catchAsync(async (req, res, next) => {
-    const campground = new Campground(req.body.campground);
-    await campground.save();
-    res.redirect(`/campgrounds/${campground._id}`); 
-}));
-
-// Submit a new review.
-app.post('/campgrounds/:id/reviews', validateReview, catchAsync(async (req, res) => {
-    const review = new Review(req.body.review);
-    const campground = await Campground.findById(req.params.id);
-    campground.reviews.push(review);
-    await review.save();
-    await campground.save();
-    res.redirect(`/campgrounds/${campground._id}`);
-}));
-
-// Edit a campground.
-app.get('/campgrounds/:id/edit', catchAsync(async (req, res) => {
-    const camp = await Campground.findById(req.params.id);
-    res.render('campgrounds/edit', {camp})
-}));
-
-// Delete a campground.
-app.delete('/campgrounds/:id', catchAsync(async (req, res) => {
-    const {id} = req.params;
-    const deletedCamp = await Campground.findByIdAndDelete(id);
-    res.redirect('/campgrounds');    
-}));
-
-// Delete a review.
-app.delete('/campgrounds/:id/reviews/:reviewId', catchAsync(async (req, res) => {
-    const {id, reviewId} = req.params;
-    await Campground.findByIdAndUpdate(id, {$pull: {reviews: reviewId}});
-    await Review.findByIdAndDelete(reviewId);
-    res.redirect(`/campgrounds/${id}`);
-}))
-
-// Get an individual campground.
-app.get('/campgrounds/:id', catchAsync(async (req, res) => {
-    const {id} = req.params;
-    const campground = await Campground.findById(id).populate('reviews');
-    console.log(campground);
-    res.render('campgrounds/show', {campground})
-}));
-
-// Submit a campground edit.
-app.put('/campgrounds/:id', validateCampground, catchAsync(async (req, res) => {
-    const {id} = req.params;
-    const camp = await Campground.findByIdAndUpdate(id, {...req.body.campground}, {runValidators: true, new: true});
-    console.log(camp);
-    res.redirect(`/campgrounds/${id}`);
-}));
 
 // If the app wasn't using any of the above valid routes, then throw an 404 page not found error.
 app.all('*', (req, res, next) => {
