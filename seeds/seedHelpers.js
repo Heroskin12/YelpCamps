@@ -1,3 +1,4 @@
+// File combines a descriptor and place to create a random camp name.
 module.exports.descriptors = [
     'Forest',
     'Ancient',
