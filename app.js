@@ -6,10 +6,15 @@ const methodOverride = require('method-override');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 const ExpressError = require('./utils/ExpressError');
-const campgrounds = require('./routes/campgrounds.js');
-const reviews = require('./routes/reviews');
+const campgroundRoutes = require('./routes/campgrounds');
+const reviewRoutes = require('./routes/reviews');
+const userRoutes = require('./routes/users')
 const session = require('express-session');
-const flash = require('connect-flash')
+const flash = require('connect-flash');
+
+const passport = require('passport');
+const passportLocal = require('passport-local');
+const User = require('./models/user');
 
 // To avoid deprecation warnings.
 mongoose.set('strictQuery', true);
@@ -59,23 +64,33 @@ const sessionConfig ={
         maxAge: 1000 * 60 * 60 * 24 * 7
     }
 }
-app.use(session(sessionConfig))
+app.use(session(sessionConfig));
 
 // Enable flashing messages.
 app.use(flash());
 
+// Configuring login system.
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new passportLocal(User.authenticate()));
+
+// How to store and unstore User in session.
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 // Providing more detail on HTTP requests in the console.
 app.use(morgan('common'));
 
-// Middleware for accessing flashed messages before any request.
+// These can be accessed from any template.
 app.use((req, res, next) => {
+    res.locals.currentUser = req.user;
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
     next();
-})
+});
 
-app.use('/campgrounds', campgrounds);
-app.use('/campgrounds/:id/reviews', reviews);
+app.use('/', userRoutes);
+app.use('/campgrounds', campgroundRoutes);
+app.use('/campgrounds/:id/reviews', reviewRoutes);
 
 // Home Page
 app.get('/', (req, res) => {
