@@ -1,4 +1,7 @@
 // List of External Dependencies
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
 const engine = require('ejs-mate');
 const express = require('express');
 const path = require('path');

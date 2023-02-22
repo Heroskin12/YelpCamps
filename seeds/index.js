@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
+
 const mongoose = require('mongoose');
 const Campground = require('../models/campground');
 const {places, descriptors} = require('./seedHelpers')
@@ -22,7 +26,7 @@ async function seedImg(random10) {
         const res = await axios.get('https://api.pexels.com/v1/search', {
             headers: {
                 Accept: "application/json",
-                Authorization: ""
+                Authorization: `${process.env.PEXEL_API_KEY}`
             },
             params: {
                 query: 'camping',
@@ -48,11 +52,21 @@ const seedDB = async() => {
         
     
         const camp = new Campground({
+            author: '63f687df695ee5c1d6397f40',
             location: `${cities[random1000].city}, ${cities[random1000].state}`,
             title: `${sample(descriptors)} ${sample(places)}`,
             description: 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Dicta, at suscipit! Tempora suscipit, iure assumenda enim nulla similique provident in!',
             price,
-            image: await seedImg(random10)
+            images: [
+                {
+                  url: 'https://res.cloudinary.com/dz2riml2t/image/upload/v1677095170/YelpCamp/p44ua4vfktw7fmcyerx6.jpg',
+                  filename: 'YelpCamp/p44ua4vfktw7fmcyerx6'
+                },
+                {
+                  url: 'https://res.cloudinary.com/dz2riml2t/image/upload/v1677095170/YelpCamp/yi7mh0wucttboteuourq.jpg',
+                  filename: 'YelpCamp/yi7mh0wucttboteuourq'
+                }
+              ]
             
         })
         await camp.save(); 
