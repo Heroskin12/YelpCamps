@@ -1,59 +1,67 @@
 <!-- Page for editing one individual campground. -->
 <% layout('layouts/boilerplate') %>
-
-    <div class="row">
-        <h1 class="text-center mb-3">Edit Campground</h1>
-        <div class="col-6 offset-3">
-            <form action="/campgrounds/<%=campground._id %>?_method=PUT" method="POST" novalidate class="validated_form" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <label class="form-label" for="name">Name of Campground</label>
-                    <input type="text" name="campground[title]" id="title" class="form-control" placeholder="Enter a name..." value="<%= campground.title %>" required>
-                    <div class="valid-feedback">Looks good!</div>
-                </div>
-        
-                <div class="mb-3">
-                    <label class="form-label" for="location">Location</label>
-                    <input type="text" class="form-control" name="campground[location]" id="location" placeholder="Enter a location..." value="<%= campground.location %>" required>
-                    <div class="valid-feedback">Looks good!</div>
-                </div>
-
-                <div class="mb-3">
-                    <label for="price" class="form-label">Campground Price</label>
-                    <div class="input-group">
-                        <span class="input-group-text" id="price-label">$</span>
-                        <input type="text" class="form-control" placeholder="0.00" name="campground[price]" id="price" aria-label="price" aria-describedby="price-label" value="<%= campground.price %>" required>
+<div class="row">
+    <h1 class="text-center mb-3">Edit Campground</h1>
+    <div class="col-lg-6 offset-lg-3">
+        <div class="card shadow">
+            <img src="https://images.unsplash.com/photo-1602391833977-358a52198938?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1074&q=80" alt="A photo of a tent in the wilderness." class="card-image-top">
+            <div class="card-body p-3">
+                <form action="/campgrounds/<%=campground._id %>?_method=PUT" method="POST" novalidate class="validated_form" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label" for="name">Name of Campground</label>
+                        <input type="text" name="campground[title]" id="title" class="form-control" placeholder="Enter a name..." value="<%= campground.title %>" required>
+                        <div class="valid-feedback">Looks good!</div>
+                    </div>
+            
+                    <div class="mb-3">
+                        <label class="form-label" for="location">Location</label>
+                        <input type="text" class="form-control" name="campground[location]" id="location" placeholder="Enter a location..." value="<%= campground.location %>" required>
                         <div class="valid-feedback">Looks good!</div>
                     </div>
     
-                </div>
-    
-                <div class="mb-3">
-                    <label class="form-label" for="description">Description</label>
-                    <textarea type="text" class="form-control" name="campground[description]" id="description" placeholder="Describe the campground..." required><%= campground.description %></textarea>
-                    <div class="valid-feedback">Looks good!</div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Add More Images</label>
-                    <div class="form-file custom-file">
-                          <input class="form-control custom-file-input" type="file" id="image" name="image" multiple onchange="previewMultiple(event)">
-                          <label for="image" class="form-label custom-file-label mt-2 ms-1"></label>
-                      </div>                  
-                  </div>
-                  <div class="mb-3">
-                    <% campground.images.forEach(function(img, i) { console.log(img.thumbnail) %>
-                        <img src="<%=img.thumbnail %>" alt="" class="img-thumbnail">
-                        <div class="form-check-inline">
-                            <input type="checkbox" name="deleteImages[]" value="<%= img.filename %>" id="image-<%=i%>">
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Campground Price</label>
+                        <div class="input-group">
+                            <span class="input-group-text" id="price-label">$</span>
+                            <input type="text" class="form-control" placeholder="0.00" name="campground[price]" id="price" aria-label="price" aria-describedby="price-label" value="<%= campground.price %>" required>
+                            <div class="valid-feedback">Looks good!</div>
                         </div>
-                        <label for="image-<%=i%>">Delete?</label>
-                        
-                    <% }) %>
-                  </div>
-                <div class="mb-3">
-                    <button class="btn btn-success" type="submit">Confirm Changes</button>
-                </div>
-            </form>
-            <a href="/campgrounds/<%= campground._id %>" class="mb-3">Cancel</a>
+        
+                    </div>
+        
+                    <div class="mb-3">
+                        <label class="form-label" for="description">Description</label>
+                        <textarea type="text" class="form-control" name="campground[description]" id="description" placeholder="Describe the campground..." required><%= campground.description %></textarea>
+                        <div class="valid-feedback">Looks good!</div>
+                    </div>
+    
+                    <div class="mb-3">
+                        <label class="form-label">Add More Images</label>
+                        <div class="form-file custom-file">
+                              <input class="form-control custom-file-input" type="file" id="image" name="image" multiple onchange="previewMultiple(event)">
+                              <label for="image" class="form-label custom-file-label mt-2 ms-1"></label>
+                          </div>                  
+                      </div>
+                      <div class="mb-3">
+                        <% campground.images.forEach(function(img, i) { console.log(img.thumbnail) %>
+                            <img src="<%=img.thumbnail %>" alt="" class="img-thumbnail d-block">
+                            <div class="form-check-inline mb-3">
+                                <input type="checkbox" name="deleteImages[]" value="<%= img.filename %>" id="image-<%=i%>">
+                            </div>
+                            <label for="image-<%=i%>">Delete?</label>
+                            
+                        <% }) %>
+                      </div>
+                    <div class="mb-3">
+                        <button class="btn btn-success w-100" type="submit">Confirm Changes</button>
+                    </div>
+                </form>
+                <a href="/campgrounds/<%= campground._id %>" class="mb-3">Cancel</a>
+    </div>
         </div>
-       </div>
+    </div>
+   </div>
+
+
+    
+        
