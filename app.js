@@ -115,7 +115,7 @@ const store = MongoStore.create({
     mongoUrl: dbURL,
     touchAfter: 24*60*60,
     crypto: {
-        secret: 'NQq.7[eAp:)7vCuy'
+        secret: process.env.SECRET
     }
 });
 store.on("error", function(e) {
@@ -123,7 +123,7 @@ store.on("error", function(e) {
 })
 const sessionConfig ={
     name: 'session',
-    secret: 'wQfqMD/@`-28VV>8',
+    secret: process.env.SECRET,
     store,
     resave: false,
     saveUninitialized: true,
