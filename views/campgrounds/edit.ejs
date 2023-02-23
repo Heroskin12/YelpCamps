@@ -41,8 +41,8 @@
                       </div>                  
                   </div>
                   <div class="mb-3">
-                    <% campground.images.forEach(function(img, i) { %>
-                        <img src="<%=img.url %>" alt="" class="img-thumbnail">
+                    <% campground.images.forEach(function(img, i) { console.log(img.thumbnail) %>
+                        <img src="<%=img.thumbnail %>" alt="" class="img-thumbnail">
                         <div class="form-check-inline">
                             <input type="checkbox" name="deleteImages[]" value="<%= img.filename %>" id="image-<%=i%>">
                         </div>
@@ -54,6 +54,6 @@
                     <button class="btn btn-success" type="submit">Confirm Changes</button>
                 </div>
             </form>
-            <a href="/campgrounds/<%= campground._id %>">Cancel</a>
+            <a href="/campgrounds/<%= campground._id %>" class="mb-3">Cancel</a>
         </div>
        </div>

@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Heroskin12/YelpCamps#readme",
   "dependencies": {
+    "@mapbox/mapbox-sdk": "^0.15.0",
     "axios": "^1.3.3",
     "cloudinary": "^1.34.0",
     "connect-flash": "^0.1.1",
